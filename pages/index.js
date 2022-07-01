@@ -1,8 +1,43 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import React from 'react';
 
 export default function Home() {
+  const [date, setDate] = React.useState(0);
+  const [time, setTime] = React.useState(0);
+  const [result, setResult] = React.useState('SET DATE');
+
+  // get current timezone info offset from UTC
+  const TimezoneOffset = () => {
+    const now = new Date();
+    // get difference between UTC and local timezone
+    const offset = now.getTimezoneOffset() / 60;
+    // convert to hours
+    const offsetHours = offset * -1;
+    // convert to string
+    const offsetString = offsetHours.toString();
+    // return string
+    return offsetString;
+  }
+  
+  const calculate = () => {
+    var prefix = "<t:"
+    var suffix = ":f>"
+
+    // convert date to unix
+    var date = new Date(document.getElementById('date').value);
+    var date_unix = date.getTime() / 1000;
+
+    var time = document.getElementById('time').value;
+    var time_split = time.split(':');
+    var time_unix = (time_split[0] - TimezoneOffset()) * 3600 + time_split[1] * 60;
+
+    var result = date_unix + time_unix;
+
+    setResult(prefix + result + suffix);
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -12,9 +47,50 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Time Converter to Discord Unix Timestamp
-        </h1>
+        <div className={styles.unselectable}>
+          <h1 className={styles.title}>
+            Time-To-Discord
+          </h1>
+          <p className={styles.description}>
+            A simple time converter that converts a time in the format of
+            <span className={styles.code}> &rdquo;HH:MM&rdquo;</span> to a Discord Unix Timestamp.
+          </p>
+        </div>
+        <div className={styles.box}>
+
+          <div className={styles.input}>
+            <label htmlFor="date">Date</label>
+            <input
+              type={'date'}
+              id={'date'}
+              onChange={(e) => setDate(e.target.value)}
+              defaultValue={'1970-01-01'}
+            />
+          </div>
+
+          <div className={styles.input}>
+            <label htmlFor="time">Time</label>
+            <input
+              type={'time'}
+              id={'time'}
+              onChange={(e) => setTime(e.target.value)}
+              defaultValue={'00:00'}
+            />
+          </div>
+          {/* Result */}
+          <div className={styles.input}>
+            <label htmlFor="result">Result</label>  
+            <p className={styles.result}>
+              <span className={styles.code} onClick={() => navigator.clipboard.writeText(result)}>{result}</span>
+            </p>
+            {/* button to copy to clipboard */}
+          </div>
+          <button onClick={calculate}>Calculate</button>
+        </div>
+        <p>
+          * Time zone offset is based on your current timezone.<br />
+          * Detected offset: <span className={styles.code}>{TimezoneOffset()}</span>
+        </p>
       </main>
 
       <footer className={styles.footer}>
